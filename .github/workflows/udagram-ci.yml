@@ -5,14 +5,22 @@ name: Node.js CI
 
 on:
   push:
-    branches: [ "master" ]
+    branches: ["master"]
   pull_request:
-    branches: [ "master" ]
+    branches: ["master"]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3  
-    - run: echo "This is test"
+      - uses: actions/checkout@v3
+      - run: docker-compose -f docker-compose-build.yaml build --parallel
+      - run: docker tag udagram-frontend:local sewunet/udagram-frontend:1.0
+      - run: docker tag udagram-api-user sewunet/udagram-api-user:1.0
+      - run: docker tag udagram-api-feed sewunet/udagram-api-feed:1.0
+      - run: docker tag reverseproxy sewunet/reverseproxy:1.0
+      - run: echo "${{secrets.DOCKER_PASSWORD}}" | docker login -u "${{secrets.DOCKER_USERNAME}}" --password-stdin
+      - run: docker push sewunet/udagram-frontend:1.0
+      - run: docker push sewunet/udagram-api-user:1.0
+      - run: docker push sewunet/udagram-api-feed:1.0
+      - run: docker push sewunet/reverseproxy:1.0
